@@ -74,7 +74,13 @@ public class DirectoryInfoServiceImpl implements DirectoryInfoService {
                         .build();
                 }
 
-                if (rating == 0 || (track.getTrackMeta().getRating() != null && track.getTrackMeta().getRating() >= rating)) {
+                if (rating == 0 || (
+                    track != null &&
+                    track.getTrackMeta() != null &&
+                    track.getTrackMeta().getTrackMetaComment() != null &&
+                    track.getTrackMeta().getTrackMetaComment().getRating() != null &&
+                    track.getTrackMeta().getTrackMetaComment().getRating() >= rating
+                )) {
                     tracks.add(track);
                 }
             }

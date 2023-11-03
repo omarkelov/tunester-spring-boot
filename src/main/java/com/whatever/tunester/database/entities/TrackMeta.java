@@ -1,17 +1,20 @@
 package com.whatever.tunester.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,7 +56,8 @@ public class TrackMeta {
 
     private String date;
 
-    private Integer rating;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private TrackMetaComment trackMetaComment;
 
     protected static class Deserializer extends StdDeserializer<TrackMeta> {
         public Deserializer() {
@@ -100,9 +104,12 @@ public class TrackMeta {
             String commentJson = getText(tags, "comment");
 
             try {
-                JsonNode commentNode = new ObjectMapper().readTree(commentJson);
-                trackMetaBuilder.rating(commentNode.get("rating").intValue());
-            } catch (IllegalArgumentException | NullPointerException | JacksonException ignored) {}
+                trackMetaBuilder.trackMetaComment(new ObjectMapper().readValue(commentJson, TrackMetaComment.class));
+            } catch (IllegalArgumentException | MismatchedInputException | JsonParseException ignored) {
+                // ignored
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             return trackMetaBuilder.build();
         }
