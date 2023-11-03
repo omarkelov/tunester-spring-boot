@@ -16,10 +16,14 @@ public interface TrackRepository extends CrudRepository<Track, UUID> {
     @Transactional
     @Modifying
     @Query(value = """
-        DELETE t, tm
+        DELETE t, tm, tmc, tmcc
         FROM track t
-        JOIN track_meta tm
+        LEFT JOIN track_meta tm
             ON t.track_meta_id = tm.id
+        LEFT JOIN track_meta_comment tmc
+            ON tm.track_meta_comment_id = tmc.id
+        LEFT JOIN track_meta_comment_cut tmcc
+            ON tmc.cut_id = tmcc.id
         WHERE t.path NOT IN :presentPaths
     """, nativeQuery = true)
     void removeNonPresent(@Param("presentPaths") List<String> presentPaths);

@@ -51,7 +51,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             return;
         }
 
-        trackRepository.removeNonPresent(paths.stream().map(path -> rootPath.relativize(path).toString()).toList());
+        trackRepository.removeNonPresent(paths.stream().map(rootPath::relativize).map(Path::toString).toList());
 
         BlockingQueue<Path> pathsQueue = new ArrayBlockingQueue<>(paths.size(), false, paths);
         CountDownLatch latch = new CountDownLatch(paths.size());
