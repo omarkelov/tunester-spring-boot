@@ -3,6 +3,7 @@ package com.whatever.tunester.services.ffmpeg;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whatever.tunester.database.entities.TrackMeta;
+import com.whatever.tunester.database.entities.TrackMetaCommentCut;
 import com.whatever.tunester.util.processrunner.ProcessRunner;
 import com.whatever.tunester.util.processrunner.ProcessRunnerFactory;
 import com.whatever.tunester.util.processrunner.UnsafeCommandException;
@@ -35,6 +36,16 @@ public class FfmpegServiceImpl implements FfmpegService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public boolean updateTrackRating(int rating) {
+        return false;
+    }
+
+    @Override
+    public boolean cutTrack(TrackMetaCommentCut trackMetaCommentCut) {
+        return false;
     }
 
     @PreDestroy
