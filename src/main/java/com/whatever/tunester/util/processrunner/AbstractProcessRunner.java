@@ -35,7 +35,11 @@ public abstract class AbstractProcessRunner implements ProcessRunner {
         }
     }
 
-    public List<String> executeCommand(String command) {
+    public List<String> executeCommand(String command, boolean isCommandSafe) throws UnsafeCommandException {
+        if (!isCommandSafe) {
+            throw new UnsafeCommandException();
+        }
+
         try {
             execute(command);
             writeCommand(String.format("echo %s", COMMANDS_DELIMITER));
