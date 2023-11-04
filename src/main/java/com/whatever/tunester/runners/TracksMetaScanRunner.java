@@ -3,8 +3,7 @@ package com.whatever.tunester.runners;
 import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMeta;
 import com.whatever.tunester.database.repositories.TrackRepository;
-import com.whatever.tunester.services.tracksmetascanner.TracksMetaScannerService;
-import com.whatever.tunester.services.tracksmetascanner.TracksMetaScannerServiceFactory;
+import com.whatever.tunester.services.tracksmetascanner.pool.TracksMetaScannerServicePool;
 import com.whatever.tunester.util.FileFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -15,11 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static com.whatever.tunester.constants.SystemProperties.N_THREADS_OPTIMAL;
@@ -50,54 +48,40 @@ public class TracksMetaScanRunner implements ApplicationRunner {
 
         trackRepository.removeNonPresent(paths.stream().map(rootPath::relativize).map(Path::toString).toList());
 
-        BlockingQueue<Path> pathsQueue = new ArrayBlockingQueue<>(paths.size(), false, paths);
-        CountDownLatch latch = new CountDownLatch(paths.size());
-        ArrayList<Thread> threads = new ArrayList<>(nThreads);
+        TracksMetaScannerServicePool tracksMetaScannerServicePool = TracksMetaScannerServicePool.newGenericPool(nThreads);
+        ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
 
-        for (int i = 0; i < nThreads; i++) {
-            Thread thread = new Thread(() -> {
-                try (TracksMetaScannerService scanner = TracksMetaScannerServiceFactory.newTracksMetaScannerService()) {
-                    for (;;) {
-                        Path path = pathsQueue.take();
-                        scanTracksMeta(scanner, path, rootPath.relativize(path), latch);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
+        CompletableFuture[] futures = paths
+            .stream()
+            .map(path -> CompletableFuture.runAsync(
+                () -> scanTracksMeta(tracksMetaScannerServicePool, path, rootPath.relativize(path)),
+                executorService
+            ))
+            .toArray(CompletableFuture[]::new);
 
-            threads.add(thread);
-            thread.start();
-        }
+        CompletableFuture.allOf(futures).join();
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        threads.forEach(Thread::interrupt);
+        tracksMetaScannerServicePool.close();
+        executorService.shutdown();
     }
 
     private void scanTracksMeta(
-        TracksMetaScannerService tracksMetaScannerService,
+        TracksMetaScannerServicePool tracksMetaScannerServicePool,
         Path path,
-        Path relativePath,
-        CountDownLatch latch
+        Path relativePath
     ) { // TODO: run in transaction
         Timestamp lastModifiedTimestamp = getLastModifiedTimestamp(path);
         Track track = trackRepository.findByPath(relativePath.toString());
 
         if (track != null) {
             if (lastModifiedTimestamp.equals(track.getLastModified())) {
-                latch.countDown();
                 return;
             }
 
             trackRepository.delete(track);
         }
 
-        TrackMeta trackMeta = tracksMetaScannerService.getTrackMeta(path.toString());
+        TrackMeta trackMeta = tracksMetaScannerServicePool.getTrackMeta(path.toString());
         track = Track.builder()
             .path(relativePath.toString())
             .lastModified(lastModifiedTimestamp)
@@ -105,7 +89,5 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             .build();
 
         trackRepository.save(track);
-
-        latch.countDown();
     }
 }
