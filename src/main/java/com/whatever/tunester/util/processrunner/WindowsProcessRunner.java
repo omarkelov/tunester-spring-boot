@@ -1,6 +1,4 @@
-package com.whatever.tunester.services.tracksmetascanner;
-
-import jakarta.annotation.PreDestroy;
+package com.whatever.tunester.util.processrunner;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,11 +7,11 @@ import java.util.UUID;
 
 import static com.whatever.tunester.constants.SystemProperties.APP_PATH;
 
-public class WindowsTracksMetaScannerService extends AbstractTracksMetaScannerService {
+public class WindowsProcessRunner extends AbstractProcessRunner {
 
     private Path tmpBatFilePath;
 
-    public WindowsTracksMetaScannerService() {
+    public WindowsProcessRunner() {
         try {
             Files.createDirectories(APP_PATH);
             tmpBatFilePath = APP_PATH.resolve("tmp_" + UUID.randomUUID() + ".bat");
@@ -33,17 +31,16 @@ public class WindowsTracksMetaScannerService extends AbstractTracksMetaScannerSe
     }
 
     @Override
-    protected void writeGetTrackMetaJsonCommand(String ffmpegCommand) throws IOException {
-        Files.writeString(tmpBatFilePath, ffmpegCommand);
+    protected void execute(String command) throws IOException {
+        Files.writeString(tmpBatFilePath, command);
         writeCommand(tmpBatFilePath.toString());
     }
 
     @Override
-    protected int getConsoleResultTrimFromIndex() {
+    protected int getResultTrimFromIndex() {
         return 4;
     }
 
-    @PreDestroy
     @Override
     public void close() {
         super.close();

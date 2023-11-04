@@ -1,0 +1,43 @@
+package com.whatever.tunester.services.tracksmetascanner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.whatever.tunester.database.entities.TrackMeta;
+import com.whatever.tunester.util.processrunner.ProcessRunner;
+import com.whatever.tunester.util.processrunner.ProcessRunnerFactory;
+import jakarta.annotation.PreDestroy;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.RequestScope;
+
+@Service
+@RequestScope
+public class TracksMetaScannerServiceImpl implements TracksMetaScannerService {
+
+    private final ProcessRunner processRunner = ProcessRunnerFactory.newProcessRunner();
+
+    @Override
+    public TrackMeta getTrackMeta(String absolutePathName) {
+        String command = String.format(
+            "ffprobe -show_format \"%s\" -v 0 -of json",
+            absolutePathName.replaceAll("%", "%%")
+        );
+        String trackMetaJson = String.join("", processRunner.executeCommand(command));
+
+        try {
+            return new ObjectMapper().readValue(trackMetaJson, TrackMeta.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PreDestroy
+    @Override
+    public void close() {
+        try {
+            processRunner.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
