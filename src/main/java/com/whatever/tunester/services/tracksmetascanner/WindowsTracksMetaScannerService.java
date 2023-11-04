@@ -3,7 +3,6 @@ package com.whatever.tunester.services.tracksmetascanner;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whatever.tunester.database.entities.TrackMeta;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 import java.io.BufferedWriter;
@@ -28,8 +27,7 @@ public class WindowsTracksMetaScannerService implements TracksMetaScannerService
     private BufferedWriter stdin;
     private Scanner scanner;
 
-    @PostConstruct
-    public void init() {
+    public WindowsTracksMetaScannerService() {
         ProcessBuilder builder = new ProcessBuilder("cmd.exe");
         try {
             Files.createDirectories(APP_PATH);

@@ -4,11 +4,11 @@ import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMeta;
 import com.whatever.tunester.database.repositories.TrackRepository;
 import com.whatever.tunester.services.tracksmetascanner.TracksMetaScannerService;
+import com.whatever.tunester.services.tracksmetascanner.TracksMetaScannerServiceFactory;
 import com.whatever.tunester.util.FileFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,9 +28,6 @@ import static com.whatever.tunester.util.TimestampUtils.getLastModifiedTimestamp
 
 @Component
 public class TracksMetaScanRunner implements ApplicationRunner {
-
-    @Autowired
-    ApplicationContext context;
 
     @Autowired
     private TrackRepository trackRepository;
@@ -59,7 +56,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
 
         for (int i = 0; i < nThreads; i++) {
             Thread thread = new Thread(() -> {
-                try (TracksMetaScannerService scanner = context.getBean("prototype", TracksMetaScannerService.class)) {
+                try (TracksMetaScannerService scanner = TracksMetaScannerServiceFactory.newTracksMetaScannerService()) {
                     for (;;) {
                         Path path = pathsQueue.take();
                         scanTracksMeta(scanner, path, rootPath.relativize(path), latch);
