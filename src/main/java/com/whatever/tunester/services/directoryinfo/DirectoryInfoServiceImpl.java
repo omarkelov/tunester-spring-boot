@@ -5,7 +5,7 @@ import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMeta;
 import com.whatever.tunester.database.repositories.TrackRepository;
 import com.whatever.tunester.entities.DirectoryInfo;
-import com.whatever.tunester.services.tracksmetascanner.TracksMetaScannerService;
+import com.whatever.tunester.services.ffmpeg.FfmpegService;
 import com.whatever.tunester.util.FileFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,7 +35,7 @@ public class DirectoryInfoServiceImpl implements DirectoryInfoService {
     private TrackRepository trackRepository;
 
     @Autowired
-    private TracksMetaScannerService tracksMetaScannerService;
+    private FfmpegService ffmpegService;
 
     @Override
     public DirectoryInfo getDirectoryInfo(String requestURI, int rating) {
@@ -66,7 +66,7 @@ public class DirectoryInfoServiceImpl implements DirectoryInfoService {
                 Track track = trackRepository.findByPath(relativePath.toString());
 
                 if (track == null || !lastModifiedTimestamp.equals(track.getLastModified())) { // TODO: save to repository (in transaction)
-                    TrackMeta trackMeta = tracksMetaScannerService.getTrackMeta(path.toString());
+                    TrackMeta trackMeta = ffmpegService.getTrackMeta(path.toString());
                     track = Track.builder()
                         .path(relativePath.toString())
                         .lastModified(lastModifiedTimestamp)

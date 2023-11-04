@@ -3,7 +3,7 @@ package com.whatever.tunester.runners;
 import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMeta;
 import com.whatever.tunester.database.repositories.TrackRepository;
-import com.whatever.tunester.services.tracksmetascanner.pool.TracksMetaScannerServicePool;
+import com.whatever.tunester.services.ffmpeg.pool.FfmpegServicePool;
 import com.whatever.tunester.util.FileFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -48,25 +48,25 @@ public class TracksMetaScanRunner implements ApplicationRunner {
 
         trackRepository.removeNonPresent(paths.stream().map(rootPath::relativize).map(Path::toString).toList());
 
-        TracksMetaScannerServicePool tracksMetaScannerServicePool = TracksMetaScannerServicePool.newGenericPool(nThreads);
-        ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+        FfmpegServicePool ffmpegServicePool = FfmpegServicePool.newGenericPool(nThreads);
+        ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);
 
         CompletableFuture[] futures = paths
             .stream()
             .map(path -> CompletableFuture.runAsync(
-                () -> scanTracksMeta(tracksMetaScannerServicePool, path, rootPath.relativize(path)),
-                executorService
+                () -> scanTracksMeta(ffmpegServicePool, path, rootPath.relativize(path)),
+                threadPool
             ))
             .toArray(CompletableFuture[]::new);
 
         CompletableFuture.allOf(futures).join();
 
-        tracksMetaScannerServicePool.close();
-        executorService.shutdown();
+        ffmpegServicePool.close();
+        threadPool.shutdown();
     }
 
     private void scanTracksMeta(
-        TracksMetaScannerServicePool tracksMetaScannerServicePool,
+        FfmpegServicePool ffmpegServicePool,
         Path path,
         Path relativePath
     ) { // TODO: run in transaction
@@ -81,7 +81,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             trackRepository.delete(track);
         }
 
-        TrackMeta trackMeta = tracksMetaScannerServicePool.getTrackMeta(path.toString());
+        TrackMeta trackMeta = ffmpegServicePool.getTrackMeta(path.toString());
         track = Track.builder()
             .path(relativePath.toString())
             .lastModified(lastModifiedTimestamp)

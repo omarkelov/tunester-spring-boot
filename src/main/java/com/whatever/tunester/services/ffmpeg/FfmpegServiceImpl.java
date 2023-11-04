@@ -1,4 +1,4 @@
-package com.whatever.tunester.services.tracksmetascanner;
+package com.whatever.tunester.services.ffmpeg;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 @RequestScope
-public class TracksMetaScannerServiceImpl implements TracksMetaScannerService {
+public class FfmpegServiceImpl implements FfmpegService {
 
     private final ProcessRunner processRunner = ProcessRunnerFactory.newProcessRunner();
 

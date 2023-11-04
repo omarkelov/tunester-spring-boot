@@ -1,8 +1,8 @@
-package com.whatever.tunester.services.tracksmetascanner;
+package com.whatever.tunester.services.ffmpeg;
 
 import com.whatever.tunester.database.entities.TrackMeta;
 
-public interface TracksMetaScannerService extends AutoCloseable {
+public interface FfmpegService extends AutoCloseable {
     TrackMeta getTrackMeta(String absolutePathName);
     void close();
 }
