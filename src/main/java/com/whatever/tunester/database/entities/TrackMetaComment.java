@@ -1,5 +1,6 @@
 package com.whatever.tunester.database.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class TrackMetaComment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JsonIgnore
     private UUID id;
 
     private Integer rating;

@@ -1,5 +1,6 @@
 package com.whatever.tunester.database.entities;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,6 +16,8 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.UUID;
+
+import static com.whatever.tunester.constants.AppConstants.NOT_PERSISTED_PREFIX;
 
 @Entity
 @NoArgsConstructor
@@ -42,5 +45,12 @@ public class Track {
             trackMeta.getTrackMetaComment().getRating() != null
                 ? trackMeta.getTrackMetaComment().getRating()
                 : -1;
+    }
+
+    @JsonGetter("id")
+    private String getIdGeneratedOnMarshalling() {
+        return id != null
+            ? id.toString()
+            : NOT_PERSISTED_PREFIX + UUID.randomUUID();
     }
 }
