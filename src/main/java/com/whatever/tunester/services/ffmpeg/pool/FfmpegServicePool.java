@@ -1,9 +1,10 @@
 package com.whatever.tunester.services.ffmpeg.pool;
 
-import com.whatever.tunester.database.entities.TrackMeta;
 import com.whatever.tunester.services.ffmpeg.FfmpegService;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+
+import java.util.function.Function;
 
 public class FfmpegServicePool implements AutoCloseable {
 
@@ -22,12 +23,12 @@ public class FfmpegServicePool implements AutoCloseable {
         return new FfmpegServicePool(maxTotal);
     }
 
-    public TrackMeta getTrackMeta(String absolutePathName) {
+    public <ResultType> ResultType useFfmpegService(Function<FfmpegService, ResultType> function) {
         FfmpegService ffmpegService = null;
 
         try {
             ffmpegService = objectPool.borrowObject();
-            return ffmpegService.getTrackMeta(absolutePathName);
+            return function.apply(ffmpegService);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

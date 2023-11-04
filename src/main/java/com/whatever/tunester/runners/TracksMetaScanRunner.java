@@ -81,7 +81,8 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             trackRepository.delete(track);
         }
 
-        TrackMeta trackMeta = ffmpegServicePool.getTrackMeta(path.toString());
+        TrackMeta trackMeta = ffmpegServicePool
+            .useFfmpegService(ffmpegService -> ffmpegService.getTrackMeta(path.toString()));
         track = Track.builder()
             .path(relativePath.toString())
             .lastModified(lastModifiedTimestamp)
