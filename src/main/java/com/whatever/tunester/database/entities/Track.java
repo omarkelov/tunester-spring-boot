@@ -34,4 +34,13 @@ public class Track {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private TrackMeta trackMeta;
+
+    public int getRating() {
+        return
+            trackMeta != null &&
+            trackMeta.getTrackMetaComment() != null &&
+            trackMeta.getTrackMetaComment().getRating() != null
+                ? trackMeta.getTrackMetaComment().getRating()
+                : -1;
+    }
 }
