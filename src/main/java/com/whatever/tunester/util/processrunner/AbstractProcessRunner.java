@@ -42,7 +42,9 @@ public abstract class AbstractProcessRunner implements ProcessRunner {
 
         try {
             execute(command);
-            writeCommand(String.format("echo %s", COMMANDS_DELIMITER));
+            // TODO: fix (the leading symbols of my command are cut during ffmpeg execution,
+            //       since ffmpeg rewrites the last line when writing the progress)
+            writeCommand(" ".repeat(512) + " echo " + COMMANDS_DELIMITER);
 
             List<String> lines = new ArrayList<>();
             while (scanner.hasNextLine()) {
