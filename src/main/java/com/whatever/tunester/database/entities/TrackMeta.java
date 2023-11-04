@@ -2,6 +2,7 @@ package com.whatever.tunester.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -59,6 +60,7 @@ public class TrackMeta {
     private String date;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty("comment")
     private TrackMetaComment trackMetaComment;
 
     protected static class Deserializer extends StdDeserializer<TrackMeta> {
