@@ -29,16 +29,16 @@ public class FfmpegServiceImpl implements FfmpegService {
     private final ProcessRunner processRunner = ProcessRunnerFactory.newProcessRunner();
 
     @Override
-    public TrackMeta getTrackMeta(String absolutePathName) {
+    public TrackMeta getTrackMeta(Path path) {
         try {
             String command = String.format(
                 "ffprobe -show_format \"%s\" -v 0 -of json",
-                absolutePathName.replaceAll("%", "%%")
+                path.toString().replaceAll("%", "%%")
             );
 
-            List<String> ffmpegResult = processRunner.executeCommand(command, Files.exists(Path.of(absolutePathName)));
+            List<String> executionResult = processRunner.executeCommand(command, Files.exists(path));
 
-            return new ObjectMapper().readValue(String.join("", ffmpegResult), TrackMeta.class);
+            return new ObjectMapper().readValue(String.join("", executionResult), TrackMeta.class);
         } catch (UnsafeCommandException | JsonProcessingException e) {
             e.printStackTrace();
             return null;
@@ -48,7 +48,7 @@ public class FfmpegServiceImpl implements FfmpegService {
     @Override
     public void rateTrack(Path path, int rating) {
         try {
-            TrackMeta trackMeta = getTrackMeta(path.toString());
+            TrackMeta trackMeta = getTrackMeta(path);
             TrackMetaComment trackMetaComment = (
                 trackMeta == null || trackMeta.getTrackMetaComment() == null
                     ? new TrackMetaComment()

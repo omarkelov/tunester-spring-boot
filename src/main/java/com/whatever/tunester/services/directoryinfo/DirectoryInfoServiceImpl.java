@@ -64,7 +64,7 @@ public class DirectoryInfoServiceImpl implements DirectoryInfoService {
                 Track track = trackRepository.findByPath(relativePath.toString());
 
                 if (track == null || !lastModifiedTimestamp.equals(track.getLastModified())) { // TODO: save to repository (in transaction)
-                    TrackMeta trackMeta = ffmpegService.getTrackMeta(path.toString());
+                    TrackMeta trackMeta = ffmpegService.getTrackMeta(path);
                     track = Track.builder()
                         .path(relativePath.toString())
                         .lastModified(lastModifiedTimestamp)
