@@ -10,11 +10,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
+@Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrackMetaComment {
     @Id
@@ -22,9 +26,21 @@ public class TrackMetaComment {
     @JsonIgnore
     private UUID id;
 
+    private Integer version;
+
     private Integer rating;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty("cut")
     private TrackMetaCommentCut trackMetaCommentCut;
+
+    public TrackMetaComment incrementedVersion() {
+        if (version != null) {
+            version++;
+        } else {
+            version = 1;
+        }
+
+        return this;
+    }
 }
