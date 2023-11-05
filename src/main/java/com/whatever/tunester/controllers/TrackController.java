@@ -1,6 +1,7 @@
 package com.whatever.tunester.controllers;
 
 import com.whatever.tunester.constants.Mappings;
+import com.whatever.tunester.database.entities.TrackMetaCommentCut;
 import com.whatever.tunester.services.track.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,3 +24,10 @@ public class TrackController {
     public void rateTrack(@RequestParam String trackPath, @RequestParam int rating) {
         trackService.rateTrack(trackPath, rating);
     }
+
+    @PatchMapping(Mappings.TRACK + Mappings.CUT)
+    @ResponseStatus(HttpStatus.OK)
+    public void cutTrack(@RequestParam String trackPath, @RequestBody TrackMetaCommentCut trackMetaCommentCut) {
+        trackService.cutTrack(trackPath, trackMetaCommentCut);
+    }
+}

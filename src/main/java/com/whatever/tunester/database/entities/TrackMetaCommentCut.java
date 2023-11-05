@@ -24,4 +24,25 @@ public class TrackMetaCommentCut {
     private Double start;
 
     private Double end;
+
+    public TrackMetaCommentCut update(TrackMetaCommentCut other) {
+        if (originalDuration == null) {
+            originalDuration = other.originalDuration;
+        }
+
+        if (other.start != null) {
+            start = start != null
+                ? start + other.start
+                : other.start;
+        }
+
+        if (other.end != null) {
+            Double startValue = start != null ? start : 0;
+            Double otherStartValue = other.start != null ? other.start : 0;
+            Double newDuration = other.end - otherStartValue;
+            end = startValue + newDuration;
+        }
+
+        return this;
+    }
 }

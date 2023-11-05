@@ -1,5 +1,6 @@
 package com.whatever.tunester.services.track;
 
+import com.whatever.tunester.database.entities.TrackMetaCommentCut;
 import com.whatever.tunester.services.ffmpeg.FfmpegService;
 import com.whatever.tunester.services.path.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,5 +24,12 @@ public class TrackServiceImpl implements TrackService {
         Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
 
         ffmpegService.rateTrack(systemPath, rating);
+    }
+
+    @Override
+    public void cutTrack(String trackRelativePath, TrackMetaCommentCut trackMetaCommentCut) {
+        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
+
+        ffmpegService.cutTrack(systemPath, trackMetaCommentCut);
     }
 }

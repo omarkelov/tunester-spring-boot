@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.whatever.tunester.util.PathUtils.extendFilename;
+import static com.whatever.tunester.util.PathUtils.getNextFreePath;
 
 @Service
 @RequestScope
@@ -55,21 +56,17 @@ public class FfmpegServiceImpl implements FfmpegService {
                     : trackMeta.getTrackMetaComment()
             ).setRating(rating).incrementedVersion();
 
+            String comment = new ObjectMapper().writeValueAsString(trackMetaComment);
             Path tmpPath = extendFilename(path, "_tmp_" + UUID.randomUUID() + "_", "");
 
             String command = String.format(
                 "ffmpeg -i \"%s\" -metadata comment=\"%s\" -codec copy \"%s\" 2>&1",
                 path.toString().replaceAll("%", "%%"),
-                new ObjectMapper().writeValueAsString(trackMetaComment).replaceAll("\"", "\\\\\""),
+                comment.replaceAll("\"", "\\\\\""),
                 tmpPath
             );
 
-            List<String> executionResult = processRunner.executeCommand(command, Files.exists(path));
-            String[] splitResult = String.join("", executionResult).split("Output #0");
-
-            if (splitResult.length < 2 || !splitResult[1].contains(String.format("\"rating\":%d", trackMetaComment.getRating()))) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error during FFmpeg processing");
-            }
+            executeFfmpegCommand(command, path, comment);
 
             renameNewVersion(path, tmpPath, trackMetaComment.getVersion());
         } catch (UnsafeCommandException | JsonProcessingException e) {
@@ -80,7 +77,54 @@ public class FfmpegServiceImpl implements FfmpegService {
 
     @Override
     public void cutTrack(Path path, TrackMetaCommentCut trackMetaCommentCut) {
+        try {
+            TrackMeta trackMeta = getTrackMeta(path);
+            TrackMetaComment trackMetaComment = (
+                trackMeta == null || trackMeta.getTrackMetaComment() == null
+                    ? new TrackMetaComment()
+                    : trackMeta.getTrackMetaComment()
+            ).incrementedVersion();
+            if (trackMetaComment.getTrackMetaCommentCut() == null) {
+                trackMetaComment.setTrackMetaCommentCut(new TrackMetaCommentCut());
+            }
+            trackMetaComment.getTrackMetaCommentCut().update(trackMetaCommentCut);
 
+            Path cutPath = getNextFreePath(extendFilename(path, "", "_cut"));
+
+            String start = trackMetaCommentCut.getStart() != null ? "-ss " + trackMetaCommentCut.getStart() : "";
+            String end = trackMetaCommentCut.getEnd() != null ? "-to " + trackMetaCommentCut.getEnd() : "";
+            String input = path.toString().replaceAll("%", "%%");
+            String comment = new ObjectMapper().writeValueAsString(trackMetaComment);
+            String fading = ""; // TODO: implement (example: "-af \"afade=type=in:st=40:d=10,afade=type=out:st=50:d=10\"")
+            String bitrateKb = "320"; // TODO: implement
+
+            String command = String.format(
+                "ffmpeg -copyts %s %s -i \"%s\" -vn -metadata comment=\"%s\" %s -b:a %sk -c:a libmp3lame \"%s\" 2>&1",
+                start,
+                end,
+                input,
+                comment.replaceAll("\"", "\\\\\""),
+                fading,
+                bitrateKb,
+                cutPath
+            );
+
+            executeFfmpegCommand(command, path, comment);
+
+//            return cutPath; // TODO: implement
+        } catch (UnsafeCommandException | JsonProcessingException e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private void executeFfmpegCommand(String command, Path path, String comment) throws UnsafeCommandException {
+        List<String> executionResult = processRunner.executeCommand(command, Files.exists(path));
+        String[] splitResult = String.join("", executionResult).split("Output #0");
+
+        if (splitResult.length < 2 || !splitResult[1].contains(comment)) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error during FFmpeg processing");
+        }
     }
 
     private void renameNewVersion(Path path, Path tmpPath, int version) {
