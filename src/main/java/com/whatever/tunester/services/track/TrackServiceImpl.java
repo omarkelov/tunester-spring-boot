@@ -19,8 +19,8 @@ public class TrackServiceImpl implements TrackService {
     private FfmpegService ffmpegService;
 
     @Override
-    public void rateTrack(String requestURI, int rating) {
-        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, requestURI);
+    public void rateTrack(String trackRelativePath, int rating) {
+        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
 
         ffmpegService.rateTrack(systemPath, rating);
     }

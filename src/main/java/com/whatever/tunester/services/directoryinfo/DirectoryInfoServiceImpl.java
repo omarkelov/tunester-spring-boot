@@ -36,12 +36,12 @@ public class DirectoryInfoServiceImpl implements DirectoryInfoService {
     private TrackRepository trackRepository;
 
     @Override
-    public DirectoryInfo getDirectoryInfo(String requestURI, int rating) {
-        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, requestURI);
+    public DirectoryInfo getDirectoryInfo(String directoryRelativePath, int rating) {
+        Path directorySystemPath = pathService.getSystemPath(ROOT_PATH_NAME, directoryRelativePath);
         Path rootPath = Path.of(ROOT_PATH_NAME);
 
         List<Path> paths;
-        try (Stream<Path> pathsStream = java.nio.file.Files.list(systemPath)) {
+        try (Stream<Path> pathsStream = java.nio.file.Files.list(directorySystemPath)) {
             paths = pathsStream.toList();
         } catch (IOException e) {
             e.printStackTrace();
