@@ -1,6 +1,7 @@
 package com.whatever.tunester.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
@@ -40,6 +41,7 @@ public class Track {
     @JsonProperty("meta")
     private TrackMeta trackMeta;
 
+    @JsonIgnore
     public int getRating() {
         return
             trackMeta != null &&
