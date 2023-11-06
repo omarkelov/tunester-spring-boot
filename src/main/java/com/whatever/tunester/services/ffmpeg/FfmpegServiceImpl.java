@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
+import static com.whatever.tunester.services.ffmpeg.Util.getBitrate;
 import static com.whatever.tunester.services.ffmpeg.Util.getFading;
 import static com.whatever.tunester.util.PathUtils.extendFilename;
 import static com.whatever.tunester.util.PathUtils.getNextFreePath;
@@ -96,16 +97,16 @@ public class FfmpegServiceImpl implements FfmpegService {
             String input = path.toString().replaceAll("%", "%%");
             String comment = new ObjectMapper().writeValueAsString(trackMetaComment);
             String fading = getFading(trackMetaCommentCut);
-            String bitrateKb = "320"; // TODO: implement
+            String bitrate = String.valueOf(getBitrate(trackMeta));
 
             String command = String.format(
-                "ffmpeg -copyts %s %s -i \"%s\" -vn -metadata comment=\"%s\" %s -b:a %sk -c:a libmp3lame \"%s\" 2>&1",
+                "ffmpeg -copyts %s %s -i \"%s\" -vn -metadata comment=\"%s\" %s -b:a %s -c:a libmp3lame \"%s\" 2>&1",
                 start,
                 end,
                 input,
                 comment.replaceAll("\"", "\\\\\""),
                 fading,
-                bitrateKb,
+                bitrate,
                 cutPath
             );
 
