@@ -36,7 +36,7 @@ public class FfmpegServiceImpl implements FfmpegService {
         try {
             String command = String.format(
                 "ffprobe -show_format \"%s\" -v 0 -of json",
-                path.toString().replaceAll("%", "%%")
+                path.toString().replace("%", "%%")
             );
 
             List<String> executionResult = processRunner.executeCommand(command, Files.exists(path));
@@ -63,8 +63,8 @@ public class FfmpegServiceImpl implements FfmpegService {
 
             String command = String.format(
                 "ffmpeg -i \"%s\" -metadata comment=\"%s\" -codec copy \"%s\" 2>&1",
-                path.toString().replaceAll("%", "%%"),
-                comment.replaceAll("\"", "\\\\\""),
+                path.toString().replace("%", "%%"),
+                comment.replace("\"", "\\\\\""),
                 tmpPath
             );
 
@@ -94,7 +94,7 @@ public class FfmpegServiceImpl implements FfmpegService {
             Path cutPath = getNextFreePath(extendFilename(path, "", "_cut"));
             String start = trackMetaCommentCut.getStart() != null ? "-ss " + trackMetaCommentCut.getStart() : "";
             String end = trackMetaCommentCut.getEnd() != null ? "-to " + trackMetaCommentCut.getEnd() : "";
-            String input = path.toString().replaceAll("%", "%%");
+            String input = path.toString().replace("%", "%%");
             String comment = new ObjectMapper().writeValueAsString(trackMetaComment);
             String fading = getFading(trackMetaCommentCut);
             String bitrate = String.valueOf(getBitrate(trackMeta));
@@ -104,7 +104,7 @@ public class FfmpegServiceImpl implements FfmpegService {
                 start,
                 end,
                 input,
-                comment.replaceAll("\"", "\\\\\""),
+                comment.replace("\"", "\\\\\""),
                 fading,
                 bitrate,
                 cutPath
