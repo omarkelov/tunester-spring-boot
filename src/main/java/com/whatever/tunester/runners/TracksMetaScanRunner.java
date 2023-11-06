@@ -84,7 +84,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
         TrackMeta trackMeta = ffmpegServicePool
             .useFfmpegService(ffmpegService -> ffmpegService.getTrackMeta(path));
         track = Track.builder()
-            .path(relativePath.toString())
+            .path(relativePath.toString().replace('\\', '/'))
             .lastModified(lastModifiedTimestamp)
             .trackMeta(trackMeta)
             .build();
