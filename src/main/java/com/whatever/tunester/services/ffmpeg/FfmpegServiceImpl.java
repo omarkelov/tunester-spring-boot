@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
+import static com.whatever.tunester.services.ffmpeg.Util.getFading;
 import static com.whatever.tunester.util.PathUtils.extendFilename;
 import static com.whatever.tunester.util.PathUtils.getNextFreePath;
 
@@ -90,12 +91,11 @@ public class FfmpegServiceImpl implements FfmpegService {
             trackMetaComment.getTrackMetaCommentCut().update(trackMetaCommentCut);
 
             Path cutPath = getNextFreePath(extendFilename(path, "", "_cut"));
-
             String start = trackMetaCommentCut.getStart() != null ? "-ss " + trackMetaCommentCut.getStart() : "";
             String end = trackMetaCommentCut.getEnd() != null ? "-to " + trackMetaCommentCut.getEnd() : "";
             String input = path.toString().replaceAll("%", "%%");
             String comment = new ObjectMapper().writeValueAsString(trackMetaComment);
-            String fading = ""; // TODO: implement (example: "-af \"afade=type=in:st=40:d=10,afade=type=out:st=50:d=10\"")
+            String fading = getFading(trackMetaCommentCut);
             String bitrateKb = "320"; // TODO: implement
 
             String command = String.format(

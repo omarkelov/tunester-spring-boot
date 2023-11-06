@@ -2,6 +2,7 @@ package com.whatever.tunester.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +25,18 @@ public class TrackMetaCommentCut {
     private Double start;
 
     private Double end;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    transient private Double fadeInStart;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    transient private Double fadeInDuration;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    transient private Double fadeOutStart;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    transient private Double fadeOutDuration;
 
     public TrackMetaCommentCut update(TrackMetaCommentCut other) {
         if (originalDuration == null) {
