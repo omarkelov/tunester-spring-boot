@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -202,6 +203,29 @@ public class TracksMetaScanRunner implements ApplicationRunner {
                     .mapToLong(Number::longValue)
                     .sum();
 
+                Map<String, Long> ratingCountByRating = new HashMap<>();
+                Streams
+                    .concat(
+                        Stream.of(
+                            tracks
+                                .stream()
+                                .map(Track::getRating)
+                                .map(String::valueOf)
+                                .collect(Collectors.groupingBy(v -> v, Collectors.counting()))
+                        ),
+                        directories
+                            .stream()
+                            .map(Directory::getRatingCountByRating)
+                    )
+                    .forEach(map -> map.forEach(
+                        (key, value) -> ratingCountByRating.compute(
+                            key,
+                            (resKey, resValue) -> resValue == null
+                                ? value
+                                : resValue + value
+                        )
+                    ));
+
                 List<String> directoriesFileNames = directoriesPathsNames
                     .stream()
                     .map(Path::of)
@@ -220,6 +244,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
                     .path(relativePath)
                     .lastUpdated(lastUpdatedTimestamp)
                     .size(size)
+                    .ratingCountByRating(ratingCountByRating)
                     .directoriesFileNames(directoriesFileNames)
                     .tracksFileNames(tracksFileNames)
                     .build();

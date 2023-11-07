@@ -2,6 +2,7 @@ package com.whatever.tunester.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.whatever.tunester.database.converters.LongByStringMapConverter;
 import com.whatever.tunester.database.converters.StringListConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -17,6 +18,7 @@ import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -38,8 +40,12 @@ public class Directory {
 
     private Long size;
 
+    @Convert(converter = LongByStringMapConverter.class)
     @Column(columnDefinition = "TEXT")
+    private Map<String, Long> ratingCountByRating;
+
     @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "TEXT")
     private List<String> directoriesFileNames;
 
     @Convert(converter = StringListConverter.class)
