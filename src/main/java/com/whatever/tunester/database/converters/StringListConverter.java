@@ -1,19 +1,19 @@
 package com.whatever.tunester.database.converters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Converter
-public class ListConverter<T> implements AttributeConverter<List<T>, String> {
-
+public class StringListConverter implements AttributeConverter<List<String>, String> {
     @Override
-    public String convertToDatabaseColumn(List<T> list) {
+    public String convertToDatabaseColumn(List<String> list) {
         if (list == null || list.isEmpty()) {
             return null;
         }
@@ -28,13 +28,13 @@ public class ListConverter<T> implements AttributeConverter<List<T>, String> {
     }
 
     @Override
-    public List<T> convertToEntityAttribute(String str) {
+    public List<String> convertToEntityAttribute(String str) {
         if (str == null) {
             return Collections.emptyList();
         }
 
         try {
-            return Arrays.stream(new ObjectMapper().readValue(str, Object[].class)).map(o -> (T) o).toList();
+            return new ObjectMapper().readValue(str, new TypeReference<ArrayList<String>>() {});
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

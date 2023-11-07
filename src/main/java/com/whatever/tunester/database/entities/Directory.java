@@ -2,7 +2,7 @@ package com.whatever.tunester.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.whatever.tunester.database.converters.ListConverter;
+import com.whatever.tunester.database.converters.StringListConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -38,11 +38,11 @@ public class Directory {
 
     private Long size;
 
-    @Convert(converter = ListConverter.class)
     @Column(columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
     private List<String> directoriesFileNames;
 
-    @Convert(converter = ListConverter.class)
+    @Convert(converter = StringListConverter.class)
     @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private List<String> tracksFileNames;
