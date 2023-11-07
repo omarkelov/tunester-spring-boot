@@ -30,6 +30,7 @@ import static com.whatever.tunester.constants.AppConstants.NOT_PERSISTED_PREFIX;
 public class Track {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JsonIgnore
     private UUID id;
 
     @Column(unique = true)

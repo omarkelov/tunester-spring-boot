@@ -28,6 +28,7 @@ import java.util.UUID;
 public class Directory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JsonIgnore
     private UUID id;
 
     @Column(unique = true)
