@@ -110,6 +110,8 @@ public class TracksMetaScanRunner implements ApplicationRunner {
     }
 
     private void scanDirectories(Path rootPath) {
+        directoryRepository.deleteAll();
+
         List<Path> directoriesPaths;
         try (Stream<Path> pathStream = Files.walk(rootPath)) {
             directoriesPaths = new ArrayList<>(
