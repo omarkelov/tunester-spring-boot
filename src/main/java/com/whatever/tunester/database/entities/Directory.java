@@ -1,5 +1,6 @@
 package com.whatever.tunester.database.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.whatever.tunester.database.converters.ListConverter;
 import jakarta.persistence.Column;
@@ -12,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -37,9 +39,13 @@ public class Directory {
 
     @Convert(converter = ListConverter.class)
     @Column(columnDefinition = "TEXT")
-    private List<String> subdirectories;
+    private List<String> directoriesFileNames;
 
     @Convert(converter = ListConverter.class)
     @Column(columnDefinition = "TEXT")
-    private List<String> tracks;
+    @JsonIgnore
+    private List<String> tracksFileNames;
+
+    @Setter
+    private transient List<Track> tracks;
 }

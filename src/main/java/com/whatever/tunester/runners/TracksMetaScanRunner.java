@@ -218,8 +218,8 @@ public class TracksMetaScanRunner implements ApplicationRunner {
                     .path(relativePath)
                     .lastUpdated(lastUpdatedTimestamp)
                     .size(size)
-                    .subdirectories(directoriesFileNames)
-                    .tracks(tracksFileNames)
+                    .directoriesFileNames(directoriesFileNames)
+                    .tracksFileNames(tracksFileNames)
                     .build();
 
                 directoryRepository.save(directory);
