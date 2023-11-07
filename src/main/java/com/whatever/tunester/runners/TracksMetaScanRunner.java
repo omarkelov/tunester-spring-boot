@@ -63,7 +63,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             return;
         }
 
-        trackRepository.removeNonPresent(tracksPaths.stream().map(rootPath::relativize).map(Path::toString).toList());
+        trackRepository.removeNonExistent(tracksPaths.stream().map(rootPath::relativize).map(Path::toString).toList());
 
         FfmpegServicePool ffmpegServicePool = FfmpegServicePool.newGenericPool(nThreads);
         ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);

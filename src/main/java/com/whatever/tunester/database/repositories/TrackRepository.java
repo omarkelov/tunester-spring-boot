@@ -24,7 +24,7 @@ public interface TrackRepository extends CrudRepository<Track, UUID> {
             ON tm.track_meta_comment_id = tmc.id
         LEFT JOIN track_meta_comment_cut tmcc
             ON tmc.track_meta_comment_cut_id = tmcc.id
-        WHERE t.path NOT IN :presentPaths
+        WHERE t.path NOT IN :existentPaths
     """, nativeQuery = true)
-    void removeNonPresent(@Param("presentPaths") List<String> presentPaths);
+    void removeNonExistent(@Param("existentPaths") List<String> existentPaths);
 }
