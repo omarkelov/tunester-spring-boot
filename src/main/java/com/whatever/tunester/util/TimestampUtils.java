@@ -8,11 +8,13 @@ import java.nio.file.attribute.FileTime;
 import java.sql.Timestamp;
 
 public class TimestampUtils {
-    public static Timestamp getLastModifiedTimestamp(Path path) {
+    public static Timestamp getLastUpdatedTimestamp(Path path) {
         try {
-            FileTime lastModifiedTime = Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime();
+            BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+            FileTime creationTime = attrs.creationTime();
+            FileTime lastModifiedTime = attrs.lastModifiedTime();
 
-            return new Timestamp(lastModifiedTime.toMillis());
+            return new Timestamp(Math.max(creationTime.toMillis(), lastModifiedTime.toMillis()));
         } catch (IOException e) {
             e.printStackTrace();
         }

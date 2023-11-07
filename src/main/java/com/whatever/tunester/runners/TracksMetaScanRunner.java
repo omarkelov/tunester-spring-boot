@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 import static com.whatever.tunester.constants.SystemProperties.N_THREADS_OPTIMAL;
 import static com.whatever.tunester.constants.SystemProperties.ROOT_PATH_NAME;
-import static com.whatever.tunester.util.TimestampUtils.getLastModifiedTimestamp;
+import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
 
 @Component
 public class TracksMetaScanRunner implements ApplicationRunner {
@@ -35,9 +35,9 @@ public class TracksMetaScanRunner implements ApplicationRunner {
         Path rootPath = Path.of(ROOT_PATH_NAME);
         int nThreads = N_THREADS_OPTIMAL;
 
-        List<Path> paths;
+        List<Path> tracksPaths;
         try (Stream<Path> pathStream = Files.walk(rootPath)) {
-            paths = pathStream
+            tracksPaths = pathStream
                 .filter(Files::isRegularFile)
                 .filter(FileFormatUtils::isAudioFile)
                 .toList();
@@ -46,15 +46,15 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             return;
         }
 
-        trackRepository.removeNonPresent(paths.stream().map(rootPath::relativize).map(Path::toString).toList());
+        trackRepository.removeNonPresent(tracksPaths.stream().map(rootPath::relativize).map(Path::toString).toList());
 
         FfmpegServicePool ffmpegServicePool = FfmpegServicePool.newGenericPool(nThreads);
         ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);
 
-        CompletableFuture[] futures = paths
+        CompletableFuture[] futures = tracksPaths
             .stream()
-            .map(path -> CompletableFuture.runAsync(
-                () -> scanTracksMeta(ffmpegServicePool, path, rootPath.relativize(path)),
+            .map(trackPath -> CompletableFuture.runAsync(
+                () -> scanTracksMeta(ffmpegServicePool, trackPath, rootPath.relativize(trackPath)),
                 threadPool
             ))
             .toArray(CompletableFuture[]::new);
@@ -70,11 +70,11 @@ public class TracksMetaScanRunner implements ApplicationRunner {
         Path path,
         Path relativePath
     ) { // TODO: run in transaction
-        Timestamp lastModifiedTimestamp = getLastModifiedTimestamp(path);
+        Timestamp lastUpdatedTimestamp = getLastUpdatedTimestamp(path);
         Track track = trackRepository.findByPath(relativePath.toString());
 
-        if (track != null) {
-            if (lastModifiedTimestamp.equals(track.getLastModified())) {
+        if (track != null && track.getLastUpdated() != null) {
+            if (lastUpdatedTimestamp.equals(track.getLastUpdated())) {
                 return;
             }
 
@@ -85,7 +85,7 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             .useFfmpegService(ffmpegService -> ffmpegService.getTrackMeta(path));
         track = Track.builder()
             .path(relativePath.toString().replace('\\', '/'))
-            .lastModified(lastModifiedTimestamp)
+            .lastUpdated(lastUpdatedTimestamp)
             .trackMeta(trackMeta)
             .build();
 

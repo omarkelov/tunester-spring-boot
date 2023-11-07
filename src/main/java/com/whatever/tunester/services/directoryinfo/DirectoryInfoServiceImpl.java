@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.whatever.tunester.constants.SystemProperties.ROOT_PATH_NAME;
-import static com.whatever.tunester.util.TimestampUtils.getLastModifiedTimestamp;
+import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
 
 @Service
 public class DirectoryInfoServiceImpl implements DirectoryInfoService {
@@ -60,14 +60,14 @@ public class DirectoryInfoServiceImpl implements DirectoryInfoService {
             }
 
             if (FileFormatUtils.isAudioFile(relativePath)) {
-                Timestamp lastModifiedTimestamp = getLastModifiedTimestamp(path);
+                Timestamp lastModifiedTimestamp = getLastUpdatedTimestamp(path);
                 Track track = trackRepository.findByPath(relativePath.toString());
 
-                if (track == null || !lastModifiedTimestamp.equals(track.getLastModified())) { // TODO: save to repository (in transaction)
+                if (track == null || !lastModifiedTimestamp.equals(track.getLastUpdated())) { // TODO: save to repository (in transaction)
                     TrackMeta trackMeta = ffmpegService.getTrackMeta(path);
                     track = Track.builder()
                         .path(relativePath.toString().replace('\\', '/'))
-                        .lastModified(lastModifiedTimestamp)
+                        .lastUpdated(lastModifiedTimestamp)
                         .trackMeta(trackMeta)
                         .build();
                 }

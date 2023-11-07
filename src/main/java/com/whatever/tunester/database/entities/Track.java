@@ -35,7 +35,7 @@ public class Track {
     @Column(unique = true)
     private String path;
 
-    private Timestamp lastModified;
+    private Timestamp lastUpdated;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty("meta")
