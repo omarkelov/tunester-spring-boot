@@ -35,20 +35,28 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         Directory directory = directoryRepository.findByPath(relativePath);
 
+        directory.setDirectories(
+            directory
+                .getDirectoriesFileNames()
+                .stream()
+                .map(directoryName -> directoryRepository.findByPath(getFullPath(directory.getPath(), directoryName)))
+                .toList()
+        );
+
         directory.setTracks(
             directory
                 .getTracksFileNames()
                 .stream()
-                .map(trackFileName -> {
-                    String trackPath = directory.getPath().equals(".")
-                        ? trackFileName
-                        : directory.getPath() + "/" + trackFileName;
-
-                    return trackRepository.findByPath(trackPath);
-                })
+                .map(trackName -> trackRepository.findByPath(getFullPath(directory.getPath(), trackName)))
                 .toList()
         );
 
         return directory;
+    }
+
+    private String getFullPath(String path, String filename) {
+        return path.equals(".")
+            ? filename
+            : path + "/" + filename;
     }
 }

@@ -46,12 +46,16 @@ public class Directory {
 
     @Convert(converter = StringListConverter.class)
     @Column(columnDefinition = "TEXT")
+    @JsonIgnore
     private List<String> directoriesFileNames;
 
     @Convert(converter = StringListConverter.class)
     @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private List<String> tracksFileNames;
+
+    @Setter
+    private transient List<Directory> directories;
 
     @Setter
     private transient List<Track> tracks;
