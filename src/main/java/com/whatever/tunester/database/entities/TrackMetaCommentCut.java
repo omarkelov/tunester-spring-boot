@@ -27,16 +27,16 @@ public class TrackMetaCommentCut {
     private Double end;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    transient private Double fadeInStart;
+    private transient Double fadeInStart;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    transient private Double fadeInDuration;
+    private transient Double fadeInDuration;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    transient private Double fadeOutStart;
+    private transient Double fadeOutStart;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    transient private Double fadeOutDuration;
+    private transient Double fadeOutDuration;
 
     public TrackMetaCommentCut update(TrackMetaCommentCut other) {
         if (originalDuration == null) {
