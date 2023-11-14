@@ -4,6 +4,7 @@ import com.whatever.tunester.database.entities.TrackMetaCommentCut;
 import com.whatever.tunester.services.ffmpeg.FfmpegService;
 import com.whatever.tunester.services.path.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
@@ -18,6 +19,13 @@ public class TrackServiceImpl implements TrackService {
 
     @Autowired
     private FfmpegService ffmpegService;
+
+    @Override
+    public FileSystemResource getTrackResource(String trackRelativePath) {
+        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
+
+        return new FileSystemResource(systemPath);
+    }
 
     @Override
     public void rateTrack(String trackRelativePath, int rating) {
