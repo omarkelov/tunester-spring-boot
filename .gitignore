@@ -1,3 +1,6 @@
+### Security
+src/main/resources/security.properties
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar

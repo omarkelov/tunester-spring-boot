@@ -4,13 +4,16 @@ import com.google.common.collect.Streams;
 import com.whatever.tunester.database.entities.Directory;
 import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMeta;
+import com.whatever.tunester.database.entities.User;
 import com.whatever.tunester.database.repositories.DirectoryRepository;
 import com.whatever.tunester.database.repositories.TrackRepository;
+import com.whatever.tunester.database.repositories.UserRepository;
 import com.whatever.tunester.services.ffmpeg.pool.FfmpegServicePool;
 import com.whatever.tunester.util.FileFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -37,6 +40,12 @@ import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
 public class TracksMetaScanRunner implements ApplicationRunner {
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private TrackRepository trackRepository;
 
     @Autowired
@@ -44,6 +53,25 @@ public class TracksMetaScanRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        if (userRepository.findByUsername("admin") == null) {
+            User admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin"))
+                .role(User.Role.ADMIN)
+                .rootPath("C:/Multimedia/Music2")
+                .build();
+
+            User user = User.builder()
+                .username("user")
+                .password(passwordEncoder.encode("user"))
+                .role(User.Role.USER)
+                .rootPath("C:/Multimedia/Music2")
+                .build();
+
+            userRepository.save(admin);
+            userRepository.save(user);
+        }
+
         Path rootPath = Path.of(ROOT_PATH_NAME);
 
         scanTracks(rootPath);
