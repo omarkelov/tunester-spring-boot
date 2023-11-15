@@ -1,5 +1,6 @@
 ### Security
 src/main/resources/security.properties
+src/main/resources/users.json
 
 HELP.md
 target/

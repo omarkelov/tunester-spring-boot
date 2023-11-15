@@ -1,13 +1,22 @@
 package com.whatever.tunester.runners;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whatever.tunester.database.entities.User;
 import com.whatever.tunester.database.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.whatever.tunester.constants.Precedence.FIRST_PRIORITY;
 
@@ -21,25 +30,31 @@ public class UsersScanRunner implements ApplicationRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Value("classpath:users.json")
+    Resource usersJsonFileResource;
+
     @Override
     public void run(ApplicationArguments args) {
-        if (userRepository.findByUsername("admin") == null) {
-            User admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin"))
-                .role(User.Role.ADMIN)
-                .rootPath("C:/Multimedia/Music2")
-                .build();
+        try {
+            String usersJsonStr = usersJsonFileResource.getContentAsString(StandardCharsets.UTF_8);
+            List<User> users = new ObjectMapper().readValue(usersJsonStr, new TypeReference<ArrayList<User>>() {});
 
-            User user = User.builder()
-                .username("user")
-                .password(passwordEncoder.encode("user"))
-                .role(User.Role.USER)
-                .rootPath("C:/Multimedia/Music2")
-                .build();
+            for (User user : users) {
+                User dbUser = userRepository.findByUsername(user.getUsername());
 
-            userRepository.save(admin);
-            userRepository.save(user);
+                if (dbUser == null) {
+                    dbUser = user;
+                }
+
+                dbUser
+                    .setPassword(passwordEncoder.encode(user.getPassword()))
+                    .setRole(user.getRole())
+                    .setRootPath(user.getRootPath());
+
+                userRepository.save(dbUser);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
