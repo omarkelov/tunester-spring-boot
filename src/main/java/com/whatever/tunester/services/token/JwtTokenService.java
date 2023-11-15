@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
-@PropertySource("classpath:security.properties")
+@PropertySource("classpath:private/security.properties")
 public class JwtTokenService implements TokenService {
 
     private static final long EXPIRATION_TIME_MILLIS = 180 * 24 * 60 * 60 * 1000L;

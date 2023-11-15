@@ -30,7 +30,7 @@ public class UsersScanRunner implements ApplicationRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("classpath:users.json")
+    @Value("classpath:private/users.json")
     Resource usersJsonFileResource;
 
     @Override
