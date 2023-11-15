@@ -9,6 +9,7 @@ import com.whatever.tunester.database.repositories.DirectoryRepository;
 import com.whatever.tunester.database.repositories.TrackRepository;
 import com.whatever.tunester.database.repositories.UserRepository;
 import com.whatever.tunester.services.ffmpeg.pool.FfmpegServicePool;
+import com.whatever.tunester.services.user.UserService;
 import com.whatever.tunester.util.FileFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -33,7 +34,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.whatever.tunester.constants.SystemProperties.N_THREADS_OPTIMAL;
-import static com.whatever.tunester.constants.SystemProperties.ROOT_PATH_NAME;
 import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
 
 @Component
@@ -41,6 +41,9 @@ public class TracksMetaScanRunner implements ApplicationRunner {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -72,7 +75,13 @@ public class TracksMetaScanRunner implements ApplicationRunner {
             userRepository.save(user);
         }
 
-        Path rootPath = Path.of(ROOT_PATH_NAME);
+        String rootPathName = userService.getUserRootPath("admin");
+
+        if (rootPathName == null) {
+            return;
+        }
+
+        Path rootPath = Path.of(rootPathName);
 
         scanTracks(rootPath);
         scanDirectories(rootPath);

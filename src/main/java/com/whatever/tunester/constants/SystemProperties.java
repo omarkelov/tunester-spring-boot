@@ -1,11 +1,8 @@
 package com.whatever.tunester.constants;
 
-import java.io.File;
 import java.nio.file.Path;
 
 public class SystemProperties {
-    public static final String ROOT_PATH_NAME = String.join(File.separator, new String[]{"C:", "Multimedia", "Music2"}); // TODO: obtain from db
-
     private static final String USER_HOME_DIRECTORY = System.getProperty("user.home");
     private static final String WINDOWS_LOCAL_DIRECTORY = System.getenv("LOCALAPPDATA");
     private static final String APP_DIRECTORY_NAME = "tunester";

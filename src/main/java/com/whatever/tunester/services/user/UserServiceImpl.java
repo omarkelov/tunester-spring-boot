@@ -28,4 +28,15 @@ public class UserServiceImpl implements UserService {
 
         return null;
     }
+
+    @Override
+    public String getUserRootPath(String username) {
+        User user = getUser(username);
+
+        if (user == null || user.getRootPath() == null) {
+            return null;
+        }
+
+        return user.getRootPath();
+    }
 }

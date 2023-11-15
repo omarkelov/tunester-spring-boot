@@ -15,6 +15,10 @@ import java.util.function.Predicate;
 public class PathServiceImpl implements PathService {
     @Override
     public Path getSystemPath(String rootPathName, String relativePath) {
+        if (rootPathName == null || relativePath == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
         List<String> pathParts = Arrays.stream(relativePath.split("/")).filter(Predicate.not(String::isBlank)).toList();
         Path systemPath = Path.of(rootPathName).resolve(String.join(File.separator, pathParts)).normalize();
 

@@ -5,11 +5,13 @@ import com.whatever.tunester.services.ffmpeg.FfmpegService;
 import com.whatever.tunester.services.path.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 
-import static com.whatever.tunester.constants.SystemProperties.ROOT_PATH_NAME;
+import static com.whatever.tunester.util.FileFormatUtils.isAudioFile;
 
 @Service
 public class TrackServiceImpl implements TrackService {
@@ -21,23 +23,29 @@ public class TrackServiceImpl implements TrackService {
     private FfmpegService ffmpegService;
 
     @Override
-    public FileSystemResource getTrackResource(String trackRelativePath) {
-        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
+    public FileSystemResource getTrackResource(Path trackPath) {
+        validate(trackPath);
 
-        return new FileSystemResource(systemPath);
+        return new FileSystemResource(trackPath);
     }
 
     @Override
-    public void rateTrack(String trackRelativePath, int rating) {
-        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
+    public void rateTrack(Path trackPath, int rating) {
+        validate(trackPath);
 
-        ffmpegService.rateTrack(systemPath, rating);
+        ffmpegService.rateTrack(trackPath, rating);
     }
 
     @Override
-    public void cutTrack(String trackRelativePath, TrackMetaCommentCut trackMetaCommentCut) {
-        Path systemPath = pathService.getSystemPath(ROOT_PATH_NAME, trackRelativePath);
+    public void cutTrack(Path trackPath, TrackMetaCommentCut trackMetaCommentCut) {
+        validate(trackPath);
 
-        ffmpegService.cutTrack(systemPath, trackMetaCommentCut);
+        ffmpegService.cutTrack(trackPath, trackMetaCommentCut);
+    }
+
+    private void validate(Path trackSystemPath) {
+        if (!isAudioFile(trackSystemPath)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }
