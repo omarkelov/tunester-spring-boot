@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+
+import static com.whatever.tunester.util.UriUtils.getPathAfterSubstring;
 
 @RestController
 @RequestMapping(value = Mappings.API, produces = "application/json")
@@ -45,9 +45,7 @@ public class TrackController {
         HttpServletRequest request
     ) {
         String rootPath = userService.getUserRootPath(userDetails.getUsername());
-
-        String uri = UriUtils.decode(request.getRequestURI(), StandardCharsets.UTF_8);
-        String trackRelativePath = uri.substring(uri.indexOf(Mappings.TRACK) + Mappings.TRACK.length());
+        String trackRelativePath = getPathAfterSubstring(request, Mappings.TRACK);
 
         Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
 

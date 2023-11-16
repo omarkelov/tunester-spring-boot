@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+
+import static com.whatever.tunester.util.UriUtils.getPathAfterSubstring;
 
 @RestController
 @RequestMapping(value = Mappings.API, produces = "application/json")
@@ -41,11 +41,9 @@ public class MusicController {
         @RequestParam(defaultValue = "0") int rating
     ) {
         String rootPath = userService.getUserRootPath(userDetails.getUsername());
+        String directoryRelativePath = getPathAfterSubstring(request, Mappings.MUSIC);
 
-        String uri = UriUtils.decode(request.getRequestURI(), StandardCharsets.UTF_8);
-        String relativePath = uri.substring(uri.indexOf(Mappings.MUSIC) + Mappings.MUSIC.length());
-
-        Path directorySystemPath = pathService.getSystemPath(rootPath, relativePath);
+        Path directorySystemPath = pathService.getSystemPath(rootPath, directoryRelativePath);
 
         return directoryService.getDirectory(Path.of(rootPath), directorySystemPath, rating);
     }
