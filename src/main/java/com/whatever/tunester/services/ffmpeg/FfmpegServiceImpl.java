@@ -64,7 +64,7 @@ public class FfmpegServiceImpl implements FfmpegService {
             String command = String.format(
                 "ffmpeg -i \"%s\" -metadata comment=\"%s\" -codec copy \"%s\" 2>&1",
                 path.toString().replace("%", "%%"),
-                comment.replace("\"", "\\\\\""),
+                comment.replace("\"", "\\\""),
                 tmpPath
             );
 
@@ -104,7 +104,7 @@ public class FfmpegServiceImpl implements FfmpegService {
                 start,
                 end,
                 input,
-                comment.replace("\"", "\\\\\""),
+                comment.replace("\"", "\\\""),
                 fading,
                 bitrate,
                 cutPath
