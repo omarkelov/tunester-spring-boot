@@ -37,19 +37,19 @@ public class UsersScanRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         try {
             String usersJsonStr = usersJsonFileResource.getContentAsString(StandardCharsets.UTF_8);
-            List<User> users = new ObjectMapper().readValue(usersJsonStr, new TypeReference<ArrayList<User>>() {});
+            List<User> configUsers = new ObjectMapper().readValue(usersJsonStr, new TypeReference<ArrayList<User>>() {});
 
-            for (User user : users) {
-                User dbUser = userRepository.findByUsername(user.getUsername());
+            for (User configUser : configUsers) {
+                User dbUser = userRepository.findByUsername(configUser.getUsername());
 
                 if (dbUser == null) {
-                    dbUser = user;
+                    dbUser = configUser;
                 }
 
                 dbUser
-                    .setPassword(passwordEncoder.encode(user.getPassword()))
-                    .setRole(user.getRole())
-                    .setRootPath(user.getRootPath());
+                    .setPassword(passwordEncoder.encode(configUser.getPassword()))
+                    .setRole(configUser.getRole())
+                    .setRootPath(configUser.getRootPath());
 
                 userRepository.save(dbUser);
             }
