@@ -22,7 +22,7 @@ import static com.whatever.tunester.util.UriUtils.getPathAfterSubstring;
 
 @RestController
 @RequestMapping(value = Mappings.API, produces = "application/json")
-public class MusicController {
+public class DirectoryController {
 
     @Autowired
     private UserService userService;
@@ -35,7 +35,7 @@ public class MusicController {
 
     @GetMapping(Mappings.MUSIC + "/**")
     @ResponseStatus(HttpStatus.OK)
-    public Directory getMusic(
+    public Directory getDirectory(
         @AuthenticationPrincipal UserDetails userDetails,
         HttpServletRequest request,
         @RequestParam(defaultValue = "0") int rating
