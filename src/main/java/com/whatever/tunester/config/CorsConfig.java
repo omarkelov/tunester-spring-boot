@@ -2,6 +2,7 @@ package com.whatever.tunester.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -9,6 +10,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableWebSecurity
 public class CorsConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -16,6 +18,7 @@ public class CorsConfig {
 
         configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
