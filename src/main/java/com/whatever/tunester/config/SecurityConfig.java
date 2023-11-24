@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String OPTIONS_MAX_AGE_SECONDS = String.valueOf(30 * 60);
+
     @Autowired
     private TokenFilter tokenFilter;
 
@@ -41,6 +43,13 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class) // TODO: why use addFilterBefore?
+            .headers(httpSecurityHeadersConfigurer ->
+                httpSecurityHeadersConfigurer.addHeaderWriter((request, response) -> {
+                    if (request.getMethod().equals(HttpMethod.OPTIONS.toString())) {
+                        response.setHeader("Access-Control-Max-Age", OPTIONS_MAX_AGE_SECONDS);
+                    }
+                })
+            )
             .build();
     }
 }
