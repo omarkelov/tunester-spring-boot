@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,13 +16,10 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-import static org.springframework.util.StringUtils.hasText;
+import static com.whatever.tunester.constants.AppConstants.TOKEN;
 
 @Component
 public class TokenFilter extends GenericFilterBean {
-
-    private static final String AUTHORIZATION = "Authorization";
-    private static final String AUTH_PREFIX = "Bearer ";
 
     @Autowired
     private TokenService tokenService;
@@ -50,10 +48,14 @@ public class TokenFilter extends GenericFilterBean {
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader(AUTHORIZATION);
+        if (request.getCookies() == null) {
+            return null;
+        }
 
-        if (hasText(authHeader) && authHeader.startsWith(AUTH_PREFIX)) {
-            return authHeader.substring(AUTH_PREFIX.length());
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals(TOKEN)) {
+                return cookie.getValue();
+            }
         }
 
         return null;

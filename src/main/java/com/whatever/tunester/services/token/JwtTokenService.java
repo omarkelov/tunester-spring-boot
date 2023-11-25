@@ -10,11 +10,11 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import static com.whatever.tunester.constants.AppConstants.TOKEN_EXPIRATION_TIME_MILLIS;
+
 @Service
 @PropertySource("classpath:private/security.properties")
 public class JwtTokenService implements TokenService {
-
-    private static final long EXPIRATION_TIME_MILLIS = 180 * 24 * 60 * 60 * 1000L;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -24,7 +24,7 @@ public class JwtTokenService implements TokenService {
         return Jwts.builder()
             .subject(subject)
             .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MILLIS))
+            .expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME_MILLIS))
             .signWith(getSecretKey())
             .compact();
     }
