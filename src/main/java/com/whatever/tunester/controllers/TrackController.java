@@ -2,7 +2,6 @@ package com.whatever.tunester.controllers;
 
 import com.whatever.tunester.constants.Mappings;
 import com.whatever.tunester.database.entities.TrackMetaCommentCut;
-import com.whatever.tunester.services.path.PathService;
 import com.whatever.tunester.services.track.TrackService;
 import com.whatever.tunester.services.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.file.Path;
-
 import static com.whatever.tunester.util.UriUtils.getPathAfterSubstring;
 
 @RestController
@@ -33,9 +30,6 @@ public class TrackController {
     private UserService userService;
 
     @Autowired
-    private PathService pathService;
-
-    @Autowired
     private TrackService trackService;
 
     @GetMapping(value = Mappings.TRACK + "/**", produces = "audio/mpeg")
@@ -44,37 +38,33 @@ public class TrackController {
         @AuthenticationPrincipal UserDetails userDetails,
         HttpServletRequest request
     ) {
-        String rootPath = userService.getUserRootPath(userDetails.getUsername());
         String trackRelativePath = getPathAfterSubstring(request, Mappings.TRACK);
+        String rootPath = userService.getUserRootPath(userDetails.getUsername());
 
-        Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
-
-        return ResponseEntity.ok().body(trackService.getTrackResource(trackSystemPath));
+        return ResponseEntity.ok().body(trackService.getTrackResource(trackRelativePath, rootPath));
     }
 
     @PatchMapping(Mappings.TRACK + Mappings.RATE)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void rateTrack(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam("trackPath") String trackRelativePath,
         @RequestParam int rating
     ) {
         String rootPath = userService.getUserRootPath(userDetails.getUsername());
-        Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
 
-        trackService.rateTrack(trackSystemPath, rating);
+        trackService.rateTrack(trackRelativePath, rootPath, rating);
     }
 
     @PatchMapping(Mappings.TRACK + Mappings.CUT)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cutTrack(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam("trackPath") String trackRelativePath,
         @RequestBody TrackMetaCommentCut trackMetaCommentCut
     ) {
         String rootPath = userService.getUserRootPath(userDetails.getUsername());
-        Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
 
-        trackService.cutTrack(trackSystemPath, trackMetaCommentCut);
+        trackService.cutTrack(trackRelativePath, rootPath, trackMetaCommentCut);
     }
 }

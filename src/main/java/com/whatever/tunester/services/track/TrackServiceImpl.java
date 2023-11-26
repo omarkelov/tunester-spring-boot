@@ -23,28 +23,34 @@ public class TrackServiceImpl implements TrackService {
     private FfmpegService ffmpegService;
 
     @Override
-    public FileSystemResource getTrackResource(Path trackPath) {
-        validate(trackPath);
+    public FileSystemResource getTrackResource(String trackRelativePath, String rootPath) {
+        Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
 
-        return new FileSystemResource(trackPath);
+        validate(trackSystemPath);
+
+        return new FileSystemResource(trackSystemPath);
     }
 
     @Override
-    public void rateTrack(Path trackPath, int rating) {
-        validate(trackPath);
+    public void rateTrack(String trackRelativePath, String rootPath, int rating) {
+        Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
 
-        ffmpegService.rateTrack(trackPath, rating);
+        validate(trackSystemPath);
+
+        ffmpegService.rateTrack(trackSystemPath, rating);
     }
 
     @Override
-    public void cutTrack(Path trackPath, TrackMetaCommentCut trackMetaCommentCut) {
-        validate(trackPath);
+    public void cutTrack(String trackRelativePath, String rootPath, TrackMetaCommentCut trackMetaCommentCut) {
+        Path trackSystemPath = pathService.getSystemPath(rootPath, trackRelativePath);
 
-        ffmpegService.cutTrack(trackPath, trackMetaCommentCut);
+        validate(trackSystemPath);
+
+        ffmpegService.cutTrack(trackSystemPath, trackMetaCommentCut);
     }
 
-    private void validate(Path trackSystemPath) {
-        if (!isAudioFile(trackSystemPath)) {
+    private void validate(Path path) {
+        if (!isAudioFile(path)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
