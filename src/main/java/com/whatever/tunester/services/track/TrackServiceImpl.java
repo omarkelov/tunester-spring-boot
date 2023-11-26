@@ -1,6 +1,8 @@
 package com.whatever.tunester.services.track;
 
+import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMetaCommentCut;
+import com.whatever.tunester.database.repositories.TrackRepository;
 import com.whatever.tunester.services.ffmpeg.FfmpegService;
 import com.whatever.tunester.services.path.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.nio.file.Path;
 
 import static com.whatever.tunester.util.FileFormatUtils.isAudioFile;
+import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
 
 @Service
 public class TrackServiceImpl implements TrackService {
@@ -21,6 +24,9 @@ public class TrackServiceImpl implements TrackService {
 
     @Autowired
     private FfmpegService ffmpegService;
+
+    @Autowired
+    private TrackRepository trackRepository;
 
     @Override
     public FileSystemResource getTrackResource(String trackRelativePath, String rootPath) {
@@ -38,6 +44,7 @@ public class TrackServiceImpl implements TrackService {
         validate(trackSystemPath);
 
         ffmpegService.rateTrack(trackSystemPath, rating);
+        rescanTrack(trackSystemPath, trackRelativePath);
     }
 
     @Override
@@ -47,11 +54,23 @@ public class TrackServiceImpl implements TrackService {
         validate(trackSystemPath);
 
         ffmpegService.cutTrack(trackSystemPath, trackMetaCommentCut);
+        rescanTrack(trackSystemPath, trackRelativePath);
     }
 
     private void validate(Path path) {
         if (!isAudioFile(path)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+    }
+
+    private void rescanTrack(Path systemPath, String relativePath) {
+        Track track = Track.builder()
+            .path(relativePath)
+            .lastUpdated(getLastUpdatedTimestamp(systemPath))
+            .trackMeta(ffmpegService.getTrackMeta(systemPath))
+            .build();
+
+        trackRepository.deleteByPath(relativePath);
+        trackRepository.save(track);
     }
 }

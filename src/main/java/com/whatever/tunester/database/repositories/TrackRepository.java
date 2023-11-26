@@ -14,6 +14,9 @@ public interface TrackRepository extends CrudRepository<Track, UUID> {
     Track findByPath(String path);
 
     @Transactional
+    void deleteByPath(String path);
+
+    @Transactional
     @Modifying
     @Query(value = """
         DELETE t, tm, tmc, tmcc
