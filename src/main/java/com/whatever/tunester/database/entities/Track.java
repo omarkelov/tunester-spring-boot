@@ -51,11 +51,4 @@ public class Track {
                 ? trackMeta.getTrackMetaComment().getRating()
                 : -1;
     }
-
-    @JsonGetter("id")
-    private String getIdGeneratedOnMarshalling() {
-        return id != null
-            ? id.toString()
-            : NOT_PERSISTED_PREFIX + UUID.randomUUID();
-    }
 }
