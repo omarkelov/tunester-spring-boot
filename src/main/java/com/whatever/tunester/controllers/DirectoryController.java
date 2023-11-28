@@ -33,7 +33,7 @@ public class DirectoryController {
     @Autowired
     private DirectoryService directoryService;
 
-    @GetMapping(Mappings.MUSIC + "/**")
+    @GetMapping(Mappings.DIRECTORY + "/**")
     @ResponseStatus(HttpStatus.OK)
     public Directory getDirectory(
         @AuthenticationPrincipal UserDetails userDetails,
@@ -41,7 +41,7 @@ public class DirectoryController {
         @RequestParam(defaultValue = "0") int rating
     ) {
         String rootPath = userService.getUserRootPath(userDetails.getUsername());
-        String directoryRelativePath = getPathAfterSubstring(request, Mappings.MUSIC);
+        String directoryRelativePath = getPathAfterSubstring(request, Mappings.DIRECTORY);
 
         Path directorySystemPath = pathService.getSystemPath(rootPath, directoryRelativePath);
 
