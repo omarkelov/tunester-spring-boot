@@ -58,7 +58,13 @@ public class TracksScanRunner implements ApplicationRunner {
             return;
         }
 
-        trackRepository.removeNonExistent(tracksPaths.stream().map(rootPath::relativize).map(Path::toString).toList());
+        trackRepository.removeNonExistent(
+            tracksPaths
+                .stream()
+                .map(rootPath::relativize)
+                .map(relativePath -> relativePath.toString().replace('\\', '/'))
+                .toList()
+        );
 
         FfmpegServicePool ffmpegServicePool = FfmpegServicePool.newGenericPool(nThreads);
         ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);
@@ -66,7 +72,10 @@ public class TracksScanRunner implements ApplicationRunner {
         CompletableFuture[] futures = tracksPaths
             .stream()
             .map(trackPath -> CompletableFuture.runAsync(
-                () -> scanTracksMeta(ffmpegServicePool, trackPath, rootPath.relativize(trackPath)),
+                () -> scanTracksMeta(
+                    ffmpegServicePool,
+                    trackPath,
+                    rootPath.relativize(trackPath).toString().replace('\\', '/')),
                 threadPool
             ))
             .toArray(CompletableFuture[]::new);
@@ -80,23 +89,20 @@ public class TracksScanRunner implements ApplicationRunner {
     private void scanTracksMeta(
         FfmpegServicePool ffmpegServicePool,
         Path path,
-        Path relativePath
-    ) { // TODO: run in transaction
+        String relativePath
+    ) {
         Timestamp lastUpdatedTimestamp = getLastUpdatedTimestamp(path);
-        Track track = trackRepository.findByPath(relativePath.toString());
+        Track track = trackRepository.findByPath(relativePath);
 
-        if (track != null && track.getLastUpdated() != null) {
-            if (lastUpdatedTimestamp.equals(track.getLastUpdated())) {
-                return;
-            }
-
-            trackRepository.delete(track);
+        if (track != null && lastUpdatedTimestamp.equals(track.getLastUpdated())) {
+            return;
         }
 
         TrackMeta trackMeta = ffmpegServicePool
             .useFfmpegService(ffmpegService -> ffmpegService.getTrackMeta(path));
         track = Track.builder()
-            .path(relativePath.toString().replace('\\', '/'))
+            .id(track != null ? track.getId() : null)
+            .path(relativePath)
             .lastUpdated(lastUpdatedTimestamp)
             .trackMeta(trackMeta)
             .build();

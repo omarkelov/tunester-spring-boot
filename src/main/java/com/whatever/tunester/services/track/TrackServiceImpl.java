@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static com.whatever.tunester.util.FileFormatUtils.isAudioFile;
 import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
@@ -64,13 +65,15 @@ public class TrackServiceImpl implements TrackService {
     }
 
     private void rescanTrack(Path systemPath, String relativePath) {
-        Track track = Track.builder()
+        Track track = trackRepository.findByPath(relativePath);
+
+        track = Track.builder()
+            .id(track.getId())
             .path(relativePath)
             .lastUpdated(getLastUpdatedTimestamp(systemPath))
             .trackMeta(ffmpegService.getTrackMeta(systemPath))
             .build();
 
-        trackRepository.deleteByPath(relativePath);
         trackRepository.save(track);
     }
 }
