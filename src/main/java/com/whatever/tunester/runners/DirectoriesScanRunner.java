@@ -121,15 +121,6 @@ public class DirectoriesScanRunner implements ApplicationRunner {
                         .max().orElse(0)
                 );
 
-                Directory directory = directoryRepository.findByPath(relativePath);
-                if (directory != null && directory.getLastUpdated() != null) {
-                    if (lastUpdatedTimestamp.equals(directory.getLastUpdated())) {
-                        return;
-                    }
-
-                    directoryRepository.delete(directory);
-                }
-
                 Long size = Streams
                     .concat(
                         tracks
@@ -182,7 +173,7 @@ public class DirectoriesScanRunner implements ApplicationRunner {
                     .map(Path::toString)
                     .toList();
 
-                directory = Directory.builder()
+                Directory directory = Directory.builder()
                     .path(relativePath)
                     .lastUpdated(lastUpdatedTimestamp)
                     .size(size)
