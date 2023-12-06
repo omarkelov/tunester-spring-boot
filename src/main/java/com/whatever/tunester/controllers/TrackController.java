@@ -1,6 +1,7 @@
 package com.whatever.tunester.controllers;
 
 import com.whatever.tunester.constants.Mappings;
+import com.whatever.tunester.database.entities.Track;
 import com.whatever.tunester.database.entities.TrackMetaCommentCut;
 import com.whatever.tunester.services.track.TrackService;
 import com.whatever.tunester.services.user.UserService;
@@ -42,6 +43,32 @@ public class TrackController {
         String rootPath = userService.getUserRootPath(userDetails.getUsername());
 
         return ResponseEntity.ok().body(trackService.getTrackResource(trackRelativePath, rootPath));
+    }
+
+    @GetMapping(Mappings.TRACK + Mappings.PREVIOUS_RANDOM)
+    @ResponseStatus(HttpStatus.OK)
+    public Track getPreviousRandomTrack(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam("trackPath") String trackRelativePath,
+        @RequestParam(defaultValue = "0") int rating,
+        @RequestParam int seed
+    ) {
+        String rootPath = userService.getUserRootPath(userDetails.getUsername());
+
+        return trackService.getPreviousRandomTrack(trackRelativePath, rootPath, rating, seed);
+    }
+
+    @GetMapping(Mappings.TRACK + Mappings.NEXT_RANDOM)
+    @ResponseStatus(HttpStatus.OK)
+    public Track getNextRandomTrack(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam("trackPath") String trackRelativePath,
+        @RequestParam(defaultValue = "0") int rating,
+        @RequestParam int seed
+    ) {
+        String rootPath = userService.getUserRootPath(userDetails.getUsername());
+
+        return trackService.getNextRandomTrack(trackRelativePath, rootPath, rating, seed);
     }
 
     @PatchMapping(Mappings.TRACK + Mappings.RATE)

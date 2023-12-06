@@ -13,6 +13,8 @@ import java.util.UUID;
 public interface TrackRepository extends CrudRepository<Track, UUID> {
     Track findByPath(String path);
 
+    List<Track> findAllByOrderByPath();
+
     @Transactional
     @Modifying
     @Query(value = """
