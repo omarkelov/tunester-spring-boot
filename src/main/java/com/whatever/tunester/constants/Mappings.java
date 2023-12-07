@@ -5,6 +5,8 @@ public class Mappings {
     public static final String LOGIN = "/login";
     public static final String LOGOUT = "/logout";
     public static final String DIRECTORY = "/directory";
+    public static final String PREVIOUS = "/previous";
+    public static final String NEXT = "/next";
     public static final String TRACK = "/track";
     public static final String PREVIOUS_RANDOM = "/previous-random";
     public static final String NEXT_RANDOM = "/next-random";

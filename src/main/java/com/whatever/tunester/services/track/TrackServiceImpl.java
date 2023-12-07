@@ -13,11 +13,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import static com.whatever.tunester.util.FileFormatUtils.isAudioFile;
+import static com.whatever.tunester.util.ListUtils.getPreviousAndNextItems;
 import static com.whatever.tunester.util.TimestampUtils.getLastUpdatedTimestamp;
 
 @Service
@@ -47,7 +46,7 @@ public class TrackServiceImpl implements TrackService {
         // TODO: Store absolute path in db for getting only tracks available for user
         // TODO: Implement it in SQL with LEAD/LAG after switch to modern version db
 
-        return getPreviousAndNextTracks(trackRelativePath, rootPath, rating, seed)[0];
+        return getPreviousAndNextTracks(trackRelativePath, rootPath, rating, seed).get(0);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class TrackServiceImpl implements TrackService {
         // TODO: Store absolute path in db for getting only tracks available for user
         // TODO: Implement it in SQL with LEAD/LAG after switch to modern version db
 
-        return getPreviousAndNextTracks(trackRelativePath, rootPath, rating, seed)[1];
+        return getPreviousAndNextTracks(trackRelativePath, rootPath, rating, seed).get(1);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class TrackServiceImpl implements TrackService {
         }
     }
 
-    private Track[] getPreviousAndNextTracks(String trackRelativePath, String rootPath, int rating, int seed) {
+    private List<Track> getPreviousAndNextTracks(String trackRelativePath, String rootPath, int rating, int seed) {
         Random random = new Random(seed);
 
         List<Track> tracks = trackRepository
@@ -94,28 +93,7 @@ public class TrackServiceImpl implements TrackService {
             .sorted((_1, _2) -> random.nextInt(-1, 2))
             .toList();
 
-        if (tracks.isEmpty()) {
-            return new Track[]{null, null};
-        }
-
-        OptionalInt trackIdxOptional = IntStream
-            .range(0, tracks.size())
-            .filter(i -> tracks.get(i).getPath().equals(trackRelativePath))
-            .findFirst();
-
-        int trackIdx = trackIdxOptional.isPresent()
-            ? trackIdxOptional.getAsInt()
-            : new Random(seed).nextInt(0, tracks.size());
-
-        Track previousTrack = trackIdx > 0
-            ? tracks.get(trackIdx - 1)
-            : tracks.get(tracks.size() - 1);
-
-        Track nextTrack = trackIdx < tracks.size() - 1
-            ? tracks.get(trackIdx + 1)
-            : tracks.get(0);
-
-        return new Track[]{previousTrack, nextTrack};
+        return getPreviousAndNextItems(tracks, i -> tracks.get(i).getPath().equals(trackRelativePath));
     }
 
     private void rescanTrack(Path systemPath, String relativePath) {

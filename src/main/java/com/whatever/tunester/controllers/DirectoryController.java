@@ -47,4 +47,28 @@ public class DirectoryController {
 
         return directoryService.getDirectory(Path.of(rootPath), directorySystemPath, rating);
     }
+
+    @GetMapping(Mappings.DIRECTORY + Mappings.PREVIOUS)
+    @ResponseStatus(HttpStatus.OK)
+    public Directory getPreviousDirectory(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam("directoryPath") String directoryRelativePath,
+        @RequestParam(defaultValue = "0") int rating
+    ) {
+        String rootPath = userService.getUserRootPath(userDetails.getUsername());
+
+        return directoryService.getPreviousDirectory(directoryRelativePath, rootPath, rating);
+    }
+
+    @GetMapping(Mappings.DIRECTORY + Mappings.NEXT)
+    @ResponseStatus(HttpStatus.OK)
+    public Directory getNextDirectory(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam("directoryPath") String directoryRelativePath,
+        @RequestParam(defaultValue = "0") int rating
+    ) {
+        String rootPath = userService.getUserRootPath(userDetails.getUsername());
+
+        return directoryService.getNextDirectory(directoryRelativePath, rootPath, rating);
+    }
 }
